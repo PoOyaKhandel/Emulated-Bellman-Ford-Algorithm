@@ -6,7 +6,11 @@ PoOya Khandel, Mohammad Hossein Tavakoli Bina
 from BellmanFord import BFA
 import msvcrt
 import re
+import timeit
 
+
+elapsedTime = 0
+start = 0
 whichPort = {}
 adrToName = {}
 routerCount = 0
@@ -20,6 +24,7 @@ with open("which_port.txt") as whichRouter:
         adrToName[int(lines[2:6])] = int(lines[0])
         routerCount += 1
 
+
 myLine = open("adj_mat.txt").readlines()[int(routerName) - 1]
 myLine = myLine.rstrip('\n')
 initialCost = re.split(" ", myLine)
@@ -27,14 +32,22 @@ print('Initial Cost is {}\n'.format(initialCost))
 
 myBf = BFA(routerCount, initialCost, routerName, whichPort, adrToName)
 myBf.who_to_send()
+
 try:
     s = input("To start BellmanFord Algorithm, Enter 's'\n")
     assert s == 's'
 except AssertionError:
     s = input("Wrong input! To start BellmanFord Algorithm, Enter 's'\n")
+
+myBf.send()
+start = timeit.default_timer()
 while True:
     hit = msvcrt.kbhit()
-    myBf.send()
+    elapsedTime = timeit.default_timer() - start
+    if elapsedTime > 1:
+        myBf.send()
+        start = elapsedTime
+
     myBf.receive()
     if hit:
         key = ord(msvcrt.getch())
