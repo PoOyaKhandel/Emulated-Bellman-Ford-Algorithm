@@ -51,8 +51,6 @@ class BFA:
             else:
                 self.permission.append(True)
 
-    # Check this function, it seems this sends
-    # message to all routers not just neighbours!
     def send(self):
         message = str()
         for sending_router in range(self.r_count):
@@ -92,7 +90,7 @@ class BFA:
                 if self.table[int(self.name) - 1][d_r_iter] == 'N':
                     temp = '99'
                 else:
-                    temp = int(self.table[int(self.name) - 1][d_r_iter])
+                    temp = self.table[int(self.name) - 1][d_r_iter]
                 for c_r_iter in range(self.r_count):
                     if self.initial_cost[c_r_iter] == 'N':
                         cost1 = 99
@@ -115,6 +113,7 @@ class BFA:
                     # lie to middle router with a high cost(Poisoned reverse)
                     lie_to = min_through
                     self.lie_table[lie_to][d_r_iter] = '99'
+                    self.send()
                 distance.clear()
         self.bf_show()
 
