@@ -2,6 +2,7 @@
 Emulated Bellman-Ford Algorithm
 PoOya Khandel, Mohammad Hossein Tavakoli Bina
 """
+
 from BellmanFord import BFA
 import msvcrt
 import re
@@ -11,7 +12,7 @@ adrToName = {}
 routerCount = 0
 hit = None
 routerName = input("Welcome to Emulated Bellman-Ford Algorithm\n"
-                   "Which router am I?")
+                   "Which router am I?\n")
 
 with open("which_port.txt") as whichRouter:
     for lines in whichRouter:
@@ -21,14 +22,16 @@ with open("which_port.txt") as whichRouter:
 
 myLine = open("adj_mat.txt").readlines()[int(routerName) - 1]
 myLine = myLine.rstrip('\n')
-firstCost = re.split(" ", myLine)
-print(firstCost)
+initialCost = re.split(" ", myLine)
+print('Initial Cost is {}\n'.format(initialCost))
 
-myBf = BFA(routerCount, firstCost, routerName, whichPort, adrToName)
+myBf = BFA(routerCount, initialCost, routerName, whichPort, adrToName)
 myBf.who_to_send()
-s = input("To start BellmanFort Algorithm, Press 's'\n")
-while not(s == 's'):
-    s = input("you should enter 's'\n")
+try:
+    s = input("To start BellmanFord Algorithm, Enter 's'\n")
+    assert s == 's'
+except AssertionError:
+    s = input("Wrong input! To start BellmanFord Algorithm, Enter 's'\n")
 while True:
     hit = msvcrt.kbhit()
     myBf.send()
@@ -37,5 +40,7 @@ while True:
         key = ord(msvcrt.getch())
         if key == ord('u'):
             myLine = open("adj_mat.txt").readlines()[int(routerName) - 1]
-            newCost = [myLine[2 * m] for m in range(routerCount)]
+            myLine = myLine.rstrip('\n')
+            newCost = re.split(" ", myLine)
+            print('New cost is {}\n'.format(newCost))
             myBf.check_cost(newCost)

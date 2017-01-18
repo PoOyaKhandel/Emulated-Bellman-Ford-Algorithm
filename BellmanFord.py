@@ -4,16 +4,15 @@ This class is for BellmanFord Algorithm Calculations
 """
 
 from socket import *
-import math
 import re
 
 
 class BFA:
-    def __init__(self, r_count, first_cost, my_name, which_port, adr_to_name):
+    def __init__(self, r_count, initial_cost, my_name, which_port, adr_to_name):
         self.use_who = dict()
         self.new_pm = None
         self.pm_adr = None
-        self.first_cost = first_cost
+        self.initial_cost = initial_cost
         self.old_pm = {}
         self.ports = which_port
         self.my_port = which_port[my_name]
@@ -35,23 +34,25 @@ class BFA:
             self.table.append([])
             self.lie_table.append([])
             for n in range(self.r_count):
-                self.table[m].append('N')
-                self.lie_table[m].append(self.first_cost[n])
+                self.table[m].append('99')
+                self.lie_table[m].append(self.initial_cost[n])
         for m in range(self.r_count):
-            self.table[int(self.name) - 1][m] = self.first_cost[m]
-            if self.first_cost[m] == 'N':
-                self.use_who[m + 1] = '@N'
+            self.table[int(self.name) - 1][m] = self.initial_cost[m]
+            if self.initial_cost[m] == 'N':
+                self.use_who[m + 1] = ''
             else:
                 self.use_who[m + 1] = str(m + 1)
 
     def who_to_send(self):
         self.permission.clear()
         for m in range(self.r_count):
-            if self.table[int(self.name) - 1][m] == 'N':
+            if self.initial_cost[m] == 'N':
                 self.permission.append(False)
             else:
                 self.permission.append(True)
 
+    # Check this function, it seems this sends
+    # message to all routers not just neighbours!
     def send(self):
         message = str()
         for sending_router in range(self.r_count):
@@ -89,37 +90,40 @@ class BFA:
             if not(int(self.name) - 1 == d_r_iter):
                 # Determine current cost to destination router
                 if self.table[int(self.name) - 1][d_r_iter] == 'N':
-                    temp = math.inf
+                    temp = '99'
                 else:
-                    temp = float(self.table[int(self.name) - 1][d_r_iter])
+                    temp = int(self.table[int(self.name) - 1][d_r_iter])
                 for c_r_iter in range(self.r_count):
-                    if self.first_cost[c_r_iter] == 'N':
-                        cost1 = math.inf
+                    if self.initial_cost[c_r_iter] == 'N':
+                        cost1 = 99
                     else:
-                        cost1 = float(self.first_cost[c_r_iter])
+                        cost1 = int(self.initial_cost[c_r_iter])
+                    # Determine cost from neighbor to destination
                     if self.table[c_r_iter][d_r_iter] == 'N':
-                        cost2 = math.inf
+                        cost2 = 99
                     else:
-                        cost2 = float(self.table[c_r_iter][d_r_iter])
+                        cost2 = int(self.table[c_r_iter][d_r_iter])
                     distance.append(cost1 + cost2)
                 min_dis = min(distance)
-                if min_dis < temp:
-                    self.table[int(self.name) - 1][d_r_iter] = str(int(min_dis))
+                # Check whether router has found new best path?
+                if min_dis < int(temp):
+                    self.table[int(self.name) - 1][d_r_iter] = str(min_dis)
                     for m in range(self.r_count):
-                        self.lie_table[m][d_r_iter] = str(int(min_dis))
+                        self.lie_table[m][d_r_iter] = str(min_dis)
                     min_through = distance.index(min_dis)
                     self.use_who[d_r_iter + 1] = str(min_through + 1)
+                    # lie to middle router with a high cost(Poisoned reverse)
                     lie_to = min_through
-                    self.lie_table[lie_to][d_r_iter] = 'N'
+                    self.lie_table[lie_to][d_r_iter] = '99'
                 distance.clear()
         self.bf_show()
 
     def bf_show(self):
-        print("\nThe Cost Tabel of router {} is :".format(self.name))
+        print("\nThe Cost table of router {} is :".format(self.name))
         print("        ", end="")
         for h in range(self.r_count):
-                print("{:<5}".format(h + 1), end="")
-        print("\n---------------------------------")
+                print("{:<8}".format(h + 1), end="")
+        print("\n----------------------------------------------------")
         for row in range(self.r_count):
             print("{}|      ".format(row + 1), end="")
             for col in range(self.r_count):
@@ -128,10 +132,11 @@ class BFA:
                 else:
                     print("{:<8}".format(self.table[row][col]), end="")
             print()
-        print("--------------------------------------------------------")
+        print("----------------------------------------------------")
 
     def check_cost(self, new_cost):
-        if self.table[int(self.name) - 1] == new_cost:
+        # Determine whether any cost has changed?
+        if self.initial_cost == new_cost:
             print("No Cost Change!")
         else:
             # 1- update its row for new costs
@@ -141,6 +146,7 @@ class BFA:
             # 5- solve pp cost
             # 6- do alg()
             # 7- show the results
+            self.initial_cost = new_cost
             print("link costs of router {} is changed!".format(self.name))
             self.table[int(self.name) - 1] = new_cost
             self.lie_table = []
@@ -150,7 +156,7 @@ class BFA:
                     self.lie_table[m].append(new_cost[n])
             for m in range(self.r_count):
                 if new_cost[m] == 'N':
-                    self.use_who[m + 1] = '@N'
+                    self.use_who[m + 1] = ''
                 else:
                     self.use_who[m + 1] = str(m + 1)
             self.who_to_send()
