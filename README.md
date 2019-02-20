@@ -5,5 +5,3 @@ This is a final project for computer networks course under supervisory of **Dr.P
 
 [Mohammad Hossein Tavakoli Bina](https://github.com/mhtb32) -> Just some little editing stuff and providing documentations.
 
-# Documentation
-You can find the full documentation files [here](https://github.com/mhtb32/Emulated-Bellman-Ford-Algorithm-documentation)
